@@ -17,5 +17,8 @@ pyarrow>=12.0.0          # Parquet support
 # Statistical tests
 statsmodels>=0.14.0      # Optional: advanced statistics
 
+# Machine learning
+scikit-learn>=1.3.0      # For scaling and encoding
+
 # Utilities
 python-dateutil>=2.8.0
