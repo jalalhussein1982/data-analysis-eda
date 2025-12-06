@@ -117,6 +117,12 @@ Key privacy features:
 
 The pipeline configuration can be exported as JSON for reproducibility. This includes all decisions made during each phase.
 
+## Author
+
+**Jalal Hussein**
+- Email: jalalhussein@gmail.com
+- GitHub: [https://github.com/jalalhussein1982/](https://github.com/jalalhussein1982/)
+
 ## License
 
 MIT License

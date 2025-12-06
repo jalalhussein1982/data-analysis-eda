@@ -267,6 +267,7 @@ col1, col2, col3 = st.columns([3, 1, 1])
 
 with col1:
     st.markdown("**Data processed in-memory only.** No storage, no tracking.")
+    st.caption("Created by Jalal Hussein | [GitHub](https://github.com/jalalhussein1982/)")
 
 with col2:
     if st.button("Privacy Policy"):
