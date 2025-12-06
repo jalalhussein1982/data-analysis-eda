@@ -75,26 +75,32 @@ def render():
     # Column Selection
     st.subheader("2. Select Columns for Analysis")
 
-    # Initialize selection
-    if 'selected_columns' not in st.session_state:
-        st.session_state.selected_columns = [col for col in df.columns if col not in recommendations]
+    # Initialize checkbox states for each column
+    for col_name in df.columns:
+        checkbox_key = f"col_select_{col_name}"
+        if checkbox_key not in st.session_state:
+            # Default: select columns not in recommendations
+            st.session_state[checkbox_key] = col_name not in recommendations
 
     # Action buttons
     col1, col2, col3 = st.columns(3)
 
     with col1:
         if st.button("Select All"):
-            st.session_state.selected_columns = df.columns.tolist()
+            for col_name in df.columns:
+                st.session_state[f"col_select_{col_name}"] = True
             st.rerun()
 
     with col2:
         if st.button("Deselect All"):
-            st.session_state.selected_columns = []
+            for col_name in df.columns:
+                st.session_state[f"col_select_{col_name}"] = False
             st.rerun()
 
     with col3:
         if st.button("Apply Recommendations"):
-            st.session_state.selected_columns = [col for col in df.columns if col not in recommendations]
+            for col_name in df.columns:
+                st.session_state[f"col_select_{col_name}"] = col_name not in recommendations
             st.rerun()
 
     # Column checkboxes
@@ -118,15 +124,11 @@ def render():
 
                     is_selected = st.checkbox(
                         f"{col_name}{flag_indicator}",
-                        value=col_name in st.session_state.selected_columns,
                         key=f"col_select_{col_name}"
                     )
 
                     if is_selected:
                         selected_cols.append(col_name)
-
-    # Update session state
-    st.session_state.selected_columns = selected_cols
 
     # Preview
     st.subheader("3. Preview Selection")
