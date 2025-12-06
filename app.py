@@ -6,6 +6,7 @@ and transforming datasets before correlation analysis.
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import atexit
 import tempfile
@@ -322,32 +323,74 @@ if st.session_state.show_privacy:
         st.session_state.show_privacy = False
         st.rerun()
 
-# Scroll to top - placed at the end after all content renders
-import streamlit.components.v1 as components
+# Scroll to top using components.html (executes in iframe but can access parent)
+# Use a unique key based on current phase to force re-render
+scroll_key = f"scroll_{st.session_state.current_phase}_{id(st.session_state)}"
+
 components.html(
-    """
+    f"""
     <script>
-        setTimeout(function() {
-            var doc = window.parent.document;
+        // Immediate execution scroll to top
+        (function() {{
+            // Unique execution marker to prevent duplicate runs
+            var marker = '{scroll_key}';
 
-            // Target the specific scrollable container in Streamlit
-            var scrollers = doc.querySelectorAll('[class*="main"] [class*="block-container"]');
-            scrollers.forEach(function(el) {
-                el.scrollIntoView({behavior: 'auto', block: 'start'});
-            });
+            function scrollToTop() {{
+                try {{
+                    // Access parent document (Streamlit app)
+                    var parentDoc = window.parent.document;
 
-            // Also try these common containers
-            var mainEl = doc.querySelector('.main');
-            if (mainEl) mainEl.scrollTop = 0;
+                    // Method 1: Target Streamlit's main content area by data-testid
+                    var mainContainer = parentDoc.querySelector('[data-testid="stAppViewContainer"]');
+                    if (mainContainer) {{
+                        mainContainer.scrollTop = 0;
+                    }}
 
-            var stApp = doc.querySelector('.stApp');
-            if (stApp) stApp.scrollTop = 0;
+                    // Method 2: Target the vertical block
+                    var verticalBlock = parentDoc.querySelector('[data-testid="stVerticalBlock"]');
+                    if (verticalBlock) {{
+                        verticalBlock.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                    }}
 
-            // Scroll parent window
-            window.parent.scrollTo(0, 0);
+                    // Method 3: Target section.main
+                    var mainSection = parentDoc.querySelector('section.main');
+                    if (mainSection) {{
+                        mainSection.scrollTop = 0;
+                    }}
 
-        }, 100);
+                    // Method 4: All scrollable elements
+                    var scrollables = parentDoc.querySelectorAll('[class*="main"], [class*="block-container"], [class*="stMain"]');
+                    scrollables.forEach(function(el) {{
+                        el.scrollTop = 0;
+                    }});
+
+                    // Method 5: Parent window scroll
+                    window.parent.scrollTo(0, 0);
+
+                    // Method 6: Find element with overflow scroll/auto and reset
+                    var allElements = parentDoc.getElementsByTagName('*');
+                    for (var i = 0; i < allElements.length; i++) {{
+                        var style = window.parent.getComputedStyle(allElements[i]);
+                        if (style.overflow === 'auto' || style.overflow === 'scroll' ||
+                            style.overflowY === 'auto' || style.overflowY === 'scroll') {{
+                            allElements[i].scrollTop = 0;
+                        }}
+                    }}
+                }} catch(e) {{
+                    // Fallback for sandboxed iframe
+                    console.log('Scroll fallback due to:', e);
+                }}
+            }}
+
+            // Execute multiple times to catch async content loading
+            scrollToTop();
+            setTimeout(scrollToTop, 50);
+            setTimeout(scrollToTop, 150);
+            setTimeout(scrollToTop, 300);
+            setTimeout(scrollToTop, 500);
+        }})();
     </script>
     """,
-    height=0
+    height=0,
+    scrolling=False
 )
