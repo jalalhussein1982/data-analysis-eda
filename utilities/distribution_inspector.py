@@ -36,28 +36,32 @@ def render_distribution_inspector(df: pd.DataFrame, state_name: str = "current")
         st.warning("No numerical columns found in the dataset.")
         return
 
+    # Initialize default selection if not exists
+    if 'dist_inspector_default' not in st.session_state:
+        st.session_state.dist_inspector_default = numerical_cols[:min(4, len(numerical_cols))]
+
     # Column selection
     st.markdown("**Select variables to inspect (1-50 recommended):**")
 
     col1, col2, col3 = st.columns([2, 1, 1])
 
-    with col1:
-        selected_cols = st.multiselect(
-            "Variables",
-            numerical_cols,
-            default=numerical_cols[:min(4, len(numerical_cols))],
-            key="dist_inspector_cols"
-        )
-
     with col2:
         if st.button("Select All Numerical"):
-            st.session_state.dist_inspector_cols = numerical_cols[:50]
+            st.session_state.dist_inspector_default = numerical_cols[:50]
             st.rerun()
 
     with col3:
         if st.button("Clear Selection"):
-            st.session_state.dist_inspector_cols = []
+            st.session_state.dist_inspector_default = []
             st.rerun()
+
+    with col1:
+        selected_cols = st.multiselect(
+            "Variables",
+            numerical_cols,
+            default=st.session_state.dist_inspector_default,
+            key="dist_inspector_cols"
+        )
 
     if not selected_cols:
         st.info("Please select at least one variable to inspect.")
