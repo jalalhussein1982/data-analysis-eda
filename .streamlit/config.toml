@@ -1,0 +1,24 @@
+[server]
+# Disable file watchers (reduces disk I/O)
+fileWatcherType = "none"
+
+# Disable usage stats collection
+gatherUsageStats = false
+
+# Max upload size in MB
+maxUploadSize = 100
+
+[browser]
+# Disable server-side stats
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = true
+
+[theme]
+primaryColor = "#667eea"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+font = "sans serif"

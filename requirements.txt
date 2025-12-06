@@ -1,0 +1,21 @@
+# requirements.txt
+
+# Core dependencies
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# File handling
+openpyxl>=3.1.0          # Excel support
+pyarrow>=12.0.0          # Parquet support
+
+# Statistical tests
+statsmodels>=0.14.0      # Optional: advanced statistics
+
+# Utilities
+python-dateutil>=2.8.0
