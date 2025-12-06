@@ -75,32 +75,33 @@ def render():
     # Column Selection
     st.subheader("2. Select Columns for Analysis")
 
-    # Initialize checkbox states for each column
-    for col_name in df.columns:
-        checkbox_key = f"col_select_{col_name}"
-        if checkbox_key not in st.session_state:
-            # Default: select columns not in recommendations
-            st.session_state[checkbox_key] = col_name not in recommendations
+    # Initialize selection state - stores which columns are selected
+    if 'scope_selected_cols' not in st.session_state:
+        st.session_state.scope_selected_cols = set(col for col in df.columns if col not in recommendations)
+
+    # Version counter to force checkbox refresh when buttons are clicked
+    if 'scope_version' not in st.session_state:
+        st.session_state.scope_version = 0
 
     # Action buttons
     col1, col2, col3 = st.columns(3)
 
     with col1:
         if st.button("Select All"):
-            for col_name in df.columns:
-                st.session_state[f"col_select_{col_name}"] = True
+            st.session_state.scope_selected_cols = set(df.columns.tolist())
+            st.session_state.scope_version += 1
             st.rerun()
 
     with col2:
         if st.button("Deselect All"):
-            for col_name in df.columns:
-                st.session_state[f"col_select_{col_name}"] = False
+            st.session_state.scope_selected_cols = set()
+            st.session_state.scope_version += 1
             st.rerun()
 
     with col3:
         if st.button("Apply Recommendations"):
-            for col_name in df.columns:
-                st.session_state[f"col_select_{col_name}"] = col_name not in recommendations
+            st.session_state.scope_selected_cols = set(col for col in df.columns if col not in recommendations)
+            st.session_state.scope_version += 1
             st.rerun()
 
     # Column checkboxes
@@ -108,6 +109,7 @@ def render():
 
     selected_cols = []
     cols_per_row = 3
+    version = st.session_state.scope_version
 
     for i in range(0, len(df.columns), cols_per_row):
         row_cols = st.columns(cols_per_row)
@@ -122,13 +124,18 @@ def render():
                     col_info = column_data[col_idx]
                     flag_indicator = f" ({col_info['Flags']})" if col_info['Flags'] != '-' else ""
 
+                    # Use version in key to force fresh widget on button clicks
                     is_selected = st.checkbox(
                         f"{col_name}{flag_indicator}",
-                        key=f"col_select_{col_name}"
+                        value=col_name in st.session_state.scope_selected_cols,
+                        key=f"col_select_{col_name}_v{version}"
                     )
 
                     if is_selected:
                         selected_cols.append(col_name)
+
+    # Update the selection state based on current checkbox values
+    st.session_state.scope_selected_cols = set(selected_cols)
 
     # Preview
     st.subheader("3. Preview Selection")
