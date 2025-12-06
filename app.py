@@ -56,6 +56,7 @@ st.set_page_config(
 )
 
 
+
 # Initialize session state
 if 'state_manager' not in st.session_state:
     st.session_state.state_manager = StateManager()
@@ -114,6 +115,54 @@ if not st.session_state.gdpr_consent:
 
 # Main Application
 st.title("Data Preparation Pipeline")
+
+# Scroll to top - inject CSS and JS
+st.markdown(
+    """
+    <style>
+        .stApp > header + div {
+            scroll-behavior: auto !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Force scroll using component
+import streamlit.components.v1 as components
+components.html(
+    """
+    <script>
+        const streamlitDoc = window.parent.document;
+
+        // Method 1: Find and scroll the main container
+        const containers = [
+            streamlitDoc.querySelector('.main'),
+            streamlitDoc.querySelector('.stApp'),
+            streamlitDoc.querySelector('[data-testid="stAppViewContainer"]'),
+            streamlitDoc.querySelector('section.main'),
+            streamlitDoc.body
+        ];
+
+        containers.forEach(function(container) {
+            if (container) {
+                container.scrollTo(0, 0);
+                container.scrollTop = 0;
+            }
+        });
+
+        // Method 2: Find all scrollable elements and reset them
+        const allElements = streamlitDoc.querySelectorAll('*');
+        allElements.forEach(function(el) {
+            if (el.scrollTop > 0) {
+                el.scrollTop = 0;
+            }
+        });
+    </script>
+    """,
+    height=0,
+    scrolling=False
+)
 
 # Sidebar navigation
 with st.sidebar:

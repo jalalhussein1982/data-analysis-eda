@@ -72,24 +72,42 @@ def render():
     if recommendations:
         st.info(f"**Recommended for removal:** {', '.join(recommendations)}")
 
-    # Column Selection
-    st.subheader("2. Select Columns for Analysis")
+    # Column Selection with Checkboxes
+    st.subheader("2. Select Columns to Keep")
+    st.markdown("Check the columns you want to include in the analysis:")
 
-    # Multiselect for column selection
-    all_columns = df.columns.tolist()
-    default_selection = [col for col in all_columns if col not in recommendations]
+    selected_cols = []
+    cols_per_row = 3
 
-    selected_cols = st.multiselect(
-        "Select columns to keep:",
-        options=all_columns,
-        default=default_selection,
-        help="Select the columns you want to include in the analysis"
-    )
+    for i in range(0, len(df.columns), cols_per_row):
+        row_cols = st.columns(cols_per_row)
+
+        for j, col_widget in enumerate(row_cols):
+            col_idx = i + j
+            if col_idx < len(df.columns):
+                col_name = df.columns[col_idx]
+
+                with col_widget:
+                    # Get column info for display
+                    col_info = column_data[col_idx]
+                    flag_text = f" ⚠️ {col_info['Flags']}" if col_info['Flags'] != '-' else ""
+
+                    # Default: checked if not in recommendations
+                    default_value = col_name not in recommendations
+
+                    is_selected = st.checkbox(
+                        f"{col_name}{flag_text}",
+                        value=default_value,
+                        key=f"phase2_col_{col_name}"
+                    )
+
+                    if is_selected:
+                        selected_cols.append(col_name)
 
     # Preview
     st.subheader("3. Preview Selection")
 
-    dropped_cols = [col for col in all_columns if col not in selected_cols]
+    dropped_cols = [col for col in df.columns if col not in selected_cols]
 
     col1, col2 = st.columns(2)
 
@@ -98,9 +116,6 @@ def render():
 
     with col2:
         st.metric("Dropped Columns", len(dropped_cols))
-
-    if selected_cols:
-        st.markdown(f"**Columns to keep:** {', '.join(selected_cols)}")
 
     if dropped_cols:
         st.markdown(f"**Columns to drop:** {', '.join(dropped_cols)}")
