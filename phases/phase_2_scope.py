@@ -75,72 +75,46 @@ def render():
     # Column Selection
     st.subheader("2. Select Columns for Analysis")
 
-    # Initialize selection state - stores which columns are selected
-    if 'scope_selected_cols' not in st.session_state:
-        st.session_state.scope_selected_cols = set(col for col in df.columns if col not in recommendations)
+    # Use a simple multiselect instead of checkboxes - much more reliable
+    all_columns = df.columns.tolist()
 
-    # Version counter to force checkbox refresh when buttons are clicked
-    if 'scope_version' not in st.session_state:
-        st.session_state.scope_version = 0
+    # Initialize default selection
+    if 'phase2_default_selection' not in st.session_state:
+        st.session_state.phase2_default_selection = [col for col in all_columns if col not in recommendations]
 
     # Action buttons
     col1, col2, col3 = st.columns(3)
 
     with col1:
         if st.button("Select All"):
-            st.session_state.scope_selected_cols = set(df.columns.tolist())
-            st.session_state.scope_version += 1
+            st.session_state.phase2_default_selection = all_columns.copy()
             st.rerun()
 
     with col2:
         if st.button("Deselect All"):
-            st.session_state.scope_selected_cols = set()
-            st.session_state.scope_version += 1
+            st.session_state.phase2_default_selection = []
             st.rerun()
 
     with col3:
         if st.button("Apply Recommendations"):
-            st.session_state.scope_selected_cols = set(col for col in df.columns if col not in recommendations)
-            st.session_state.scope_version += 1
+            st.session_state.phase2_default_selection = [col for col in all_columns if col not in recommendations]
             st.rerun()
 
-    # Column checkboxes
-    st.markdown("**Select columns to keep:**")
+    # Multiselect for column selection
+    selected_cols = st.multiselect(
+        "Select columns to keep:",
+        options=all_columns,
+        default=st.session_state.phase2_default_selection,
+        help="Select the columns you want to include in the analysis"
+    )
 
-    selected_cols = []
-    cols_per_row = 3
-    version = st.session_state.scope_version
-
-    for i in range(0, len(df.columns), cols_per_row):
-        row_cols = st.columns(cols_per_row)
-
-        for j, col_widget in enumerate(row_cols):
-            col_idx = i + j
-            if col_idx < len(df.columns):
-                col_name = df.columns[col_idx]
-
-                with col_widget:
-                    # Get column info
-                    col_info = column_data[col_idx]
-                    flag_indicator = f" ({col_info['Flags']})" if col_info['Flags'] != '-' else ""
-
-                    # Use version in key to force fresh widget on button clicks
-                    is_selected = st.checkbox(
-                        f"{col_name}{flag_indicator}",
-                        value=col_name in st.session_state.scope_selected_cols,
-                        key=f"col_select_{col_name}_v{version}"
-                    )
-
-                    if is_selected:
-                        selected_cols.append(col_name)
-
-    # Update the selection state based on current checkbox values
-    st.session_state.scope_selected_cols = set(selected_cols)
+    # Update the default for next time
+    st.session_state.phase2_default_selection = selected_cols
 
     # Preview
     st.subheader("3. Preview Selection")
 
-    dropped_cols = [col for col in df.columns if col not in selected_cols]
+    dropped_cols = [col for col in all_columns if col not in selected_cols]
 
     col1, col2 = st.columns(2)
 
@@ -149,6 +123,9 @@ def render():
 
     with col2:
         st.metric("Dropped Columns", len(dropped_cols))
+
+    if selected_cols:
+        st.markdown(f"**Columns to keep:** {', '.join(selected_cols)}")
 
     if dropped_cols:
         st.markdown(f"**Columns to drop:** {', '.join(dropped_cols)}")
