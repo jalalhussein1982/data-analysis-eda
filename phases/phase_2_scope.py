@@ -75,41 +75,16 @@ def render():
     # Column Selection
     st.subheader("2. Select Columns for Analysis")
 
-    # Use a simple multiselect instead of checkboxes - much more reliable
-    all_columns = df.columns.tolist()
-
-    # Initialize default selection
-    if 'phase2_default_selection' not in st.session_state:
-        st.session_state.phase2_default_selection = [col for col in all_columns if col not in recommendations]
-
-    # Action buttons
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        if st.button("Select All"):
-            st.session_state.phase2_default_selection = all_columns.copy()
-            st.rerun()
-
-    with col2:
-        if st.button("Deselect All"):
-            st.session_state.phase2_default_selection = []
-            st.rerun()
-
-    with col3:
-        if st.button("Apply Recommendations"):
-            st.session_state.phase2_default_selection = [col for col in all_columns if col not in recommendations]
-            st.rerun()
-
     # Multiselect for column selection
+    all_columns = df.columns.tolist()
+    default_selection = [col for col in all_columns if col not in recommendations]
+
     selected_cols = st.multiselect(
         "Select columns to keep:",
         options=all_columns,
-        default=st.session_state.phase2_default_selection,
+        default=default_selection,
         help="Select the columns you want to include in the analysis"
     )
-
-    # Update the default for next time
-    st.session_state.phase2_default_selection = selected_cols
 
     # Preview
     st.subheader("3. Preview Selection")
