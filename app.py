@@ -116,53 +116,6 @@ if not st.session_state.gdpr_consent:
 # Main Application
 st.title("Data Preparation Pipeline")
 
-# Scroll to top - inject CSS and JS
-st.markdown(
-    """
-    <style>
-        .stApp > header + div {
-            scroll-behavior: auto !important;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Force scroll using component
-import streamlit.components.v1 as components
-components.html(
-    """
-    <script>
-        const streamlitDoc = window.parent.document;
-
-        // Method 1: Find and scroll the main container
-        const containers = [
-            streamlitDoc.querySelector('.main'),
-            streamlitDoc.querySelector('.stApp'),
-            streamlitDoc.querySelector('[data-testid="stAppViewContainer"]'),
-            streamlitDoc.querySelector('section.main'),
-            streamlitDoc.body
-        ];
-
-        containers.forEach(function(container) {
-            if (container) {
-                container.scrollTo(0, 0);
-                container.scrollTop = 0;
-            }
-        });
-
-        // Method 2: Find all scrollable elements and reset them
-        const allElements = streamlitDoc.querySelectorAll('*');
-        allElements.forEach(function(el) {
-            if (el.scrollTop > 0) {
-                el.scrollTop = 0;
-            }
-        });
-    </script>
-    """,
-    height=0,
-    scrolling=False
-)
 
 # Sidebar navigation
 with st.sidebar:
@@ -368,3 +321,33 @@ if st.session_state.show_privacy:
     if st.button("Close Privacy Policy"):
         st.session_state.show_privacy = False
         st.rerun()
+
+# Scroll to top - placed at the end after all content renders
+import streamlit.components.v1 as components
+components.html(
+    """
+    <script>
+        setTimeout(function() {
+            var doc = window.parent.document;
+
+            // Target the specific scrollable container in Streamlit
+            var scrollers = doc.querySelectorAll('[class*="main"] [class*="block-container"]');
+            scrollers.forEach(function(el) {
+                el.scrollIntoView({behavior: 'auto', block: 'start'});
+            });
+
+            // Also try these common containers
+            var mainEl = doc.querySelector('.main');
+            if (mainEl) mainEl.scrollTop = 0;
+
+            var stApp = doc.querySelector('.stApp');
+            if (stApp) stApp.scrollTop = 0;
+
+            // Scroll parent window
+            window.parent.scrollTo(0, 0);
+
+        }, 100);
+    </script>
+    """,
+    height=0
+)
