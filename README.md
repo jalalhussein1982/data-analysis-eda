@@ -35,7 +35,7 @@ A comprehensive, GDPR-compliant data preparation tool for cleaning, validating, 
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/data-analysis-eda.git
+git clone https://github.com/jalalhussein1982/data-analysis-eda.git
 cd data-analysis-eda
 
 # Create virtual environment (optional but recommended)
